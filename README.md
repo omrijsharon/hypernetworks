@@ -1,6 +1,9 @@
 # Hyper-Networks
 Hyper-Networks implementation in Pytorch.
 
+## Requirements
+Tested on python 3.8 and pytorch 1.10.
+
 ## How to use?
 - import it:
 ```
@@ -20,4 +23,16 @@ z = model(x, y)
 child_weights = parent_model(x)
 child_model <- child_weights
 z = child_model(y)
+```
+## A code example
+This code example uses torch_x (torch extensions package):
+```
+    batch_size = 6
+    num_features = 64
+    parent = MLP([num_features, 16, 10], nn.ReLU(), nn.Softmax(dim=1))
+    child = MLP([10, 32, 1], nn.ReLU(), nn.Sigmoid())
+    x = torch.randn(batch_size, num_features)
+    y = torch.randn(3, 10)
+    model = HyperNetwork(parent, child)
+    model(x, y)
 ```
