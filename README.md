@@ -34,5 +34,6 @@ This code example uses torch_x (torch extensions package):
     x = torch.randn(batch_size, num_features)
     y = torch.randn(3, 10)
     model = HyperNetwork(parent, child)
-    model(x, y)
+    z = model(x, y)
 ```
+- in this example, z size/shape will be (18, 1).
