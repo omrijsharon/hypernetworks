@@ -37,3 +37,10 @@ This code example uses torch_x (torch extensions package):
     z = model(x, y)
 ```
 - in this example, z size/shape will be (18, 1).
+
+
+
+## Inspired by the papers:
+1. HyperNetworks (https://arxiv.org/pdf/1609.09106.pdf)
+2. Lior Wolf video on Hyper-Networks (https://www.youtube.com/watch?v=KY9DoutzH6k)
+
