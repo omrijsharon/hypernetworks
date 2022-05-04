@@ -18,6 +18,6 @@ z = model(x, y)
 - Notice the hyper-network gets 2 inputs:
 ```
 child_weights = parent_model(x)
- child_model <- child_weights
+child_model <- child_weights
 z = child_model(y)
 ```
