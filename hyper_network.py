@@ -43,5 +43,5 @@ class HyperNetwork(nn.Module):
 
     def forward(self, x, y):
         children_models = self._beforward(x) # for every sample of x -> a tailored model is created.
-        children_output = [child_model(y) for i, child_model in enumerate(children_models)]
+        children_output = [child_model(y) for child_model in children_models]
         return torch.vstack(children_output)
