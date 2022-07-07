@@ -14,7 +14,7 @@ from hypernetworks import HyperNetwork
 ```
 model = HyperNetwork(parent_model, child_model)
 ```
-- Prepare data that suits a hypernetwork and feed it to the hypernetwork model (x goes through the parent network that outputs weights for the child network. y goes through the child network that get its weights from the parent network's output):
+- Prepare data that suits a hypernetwork and feed it to the hypernetwork model (x goes through the parent network which outputs weights for the child network. y goes through the child network that get its weights from the parent network's output):
 ```
 z = model(x, y)
 ```
