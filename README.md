@@ -1,5 +1,5 @@
 # Hyper-Networks
-Hyper-Networks implementation in Pytorch.
+Hyper-Networks implementation for Pytorch.
 
 ## Requirements
 Tested on python 3.8 and pytorch 1.10.
