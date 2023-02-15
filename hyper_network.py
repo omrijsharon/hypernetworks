@@ -68,7 +68,7 @@ class HierarchicalHyperNetwork(nn.Module):
             # from grandchild to parent since only the youngest sibling has the correct number of parameters.
             target_num, target_shape = self.model_info(self.models[-i])
             total = sum(target_num)
-            self.models[-i-1] = nn.Sequential(self.models[-i-1], nn.Linear(list(self.models[-i-1].parameters())[-i].size(0), total))
+            self.models[-i-1] = nn.Sequential(self.models[-i-1], nn.Linear(list(self.models[-i-1].parameters())[-1].size(0), total))
             self.target_num.append(target_num)
             self.target_shape.append(target_shape)
             self.total.append(total)
@@ -97,26 +97,43 @@ class HierarchicalHyperNetwork(nn.Module):
         return target_model
 
     def _split(self, target_params, target_num):
-        return list(torch.split(target_params, target_num, dim=1))
+        return list(torch.split(target_params.squeeze(0), target_num, dim=0)) # turns a tuple into a list such that target_params can be modified later.
 
     def _reshape(self, split_params: list, shape):
         for i, params in enumerate(split_params):
-            split_params[i] = params.reshape(params.size(0), *shape[i])
+            split_params[i] = params.reshape(*shape[i])
         return split_params
-
-    def _beforward(self, hyper_model, inp, target_model):
-        target_params = hyper_model(inp)
-        self._construct(target_model, target_params)
 
     def forward(self, inps: list):
         '''
         :param list: list of tensor inputs to the parent model. [x, y, z...] each with shape (batch_size, input_size)
         :return: last model output. shape: (batch_size, output_size)
         '''
-        for i in range(len(inps[0])):
-            for j in range(len(self.models) - 1):
-                self._beforward(self.models[j], inps[j][i].unsqueeze(0), self.models[j+1])
+        # init output as an empty tensor with the correct shape
+        output = torch.empty(0, self.target_shape[-1][-1][-1])
+        for i in range(len(inps[0])): # for every sample in the batch
+            for j in range(len(self.models) - 1): # for every model in the hierarchy
+                target_params = self.models[j](inps[j][i].unsqueeze(0))
+                target_params = self._split(target_params, self.target_num[j+1])
+                target_params = self._reshape(target_params, self.target_shape[j+1])
+                for layer_num, params in enumerate(self.models[j+1].parameters()):
+                    # copy the parameters of the target model to the model in the hierarchy
+                    params.data += (-params.data + target_params[layer_num])
+                    # params.requires_grad_(False)
+                    # params.copy_(target_params[layer_num])
+                    # params.requires_grad_(True)
+            # last model in the hierarchy
+            output = torch.vstack((output, self.models[-1](inps[-1][i].unsqueeze(0))))
+        return output
 
-        # self.models = self._beforward(self.models[0][0], inps[0], self.models[1][0])
-        # children_output = [child_model(y) for child_model in children_models]
-        # return torch.vstack(children_output)
+
+if __name__ == '__main__':
+    in_f, out_f = 10, 2
+    batch_size = 4
+    models = [nn.Linear(in_f, out_f, bias=True) for _ in range(3)]
+    hnn = HierarchicalHyperNetwork(models)
+    x = torch.rand(batch_size, in_f)
+    y = torch.rand(batch_size, in_f)
+    z = torch.rand(batch_size, in_f)
+    o = hnn([x, y, z])
+    print(o.shape)
